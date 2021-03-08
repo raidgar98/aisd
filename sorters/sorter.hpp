@@ -7,6 +7,7 @@
 #include <random>
 #include <algorithm>
 #include <chrono>
+#include <cassert>
 
 #include <boost/type_index.hpp>
 
@@ -47,9 +48,9 @@ namespace utils
 	}
 };
 
-namespace sorters
+namespace sorting_algorithms
 {
-	template <typename Child, typename Element>
+	template < template<typename Element> typename Child, typename Element>
 	struct abstract_sorter
 	{
 		using coll_t = collection_t<Element>;
@@ -74,9 +75,9 @@ namespace sorters
 			return os;
 		}
 
-		inline friend std::ostream& operator<<(std::ostream& os, Child&& ss)
+		inline friend std::ostream& operator<<(std::ostream& os, Child<Element>&& ss)
 		{
-			Child c{ss};
+			Child<Element> c{ss};
 			os << c;
 			return os;
 		}
@@ -101,7 +102,7 @@ namespace sorters
 	private:
 		static std::string get_class_name()
 		{
-			return boost::typeindex::type_id<Child>().pretty_name();
+			return boost::typeindex::type_id< Child<Element> >().pretty_name();
 		}
 	};
 }
