@@ -22,7 +22,7 @@ namespace utils
 	void create_random_data(collection_t<T> &out, const size_t count = 10)
 	{
 		std::random_device engine;
-		std::uniform_int_distribution<int> range{-1000, 1000};
+		std::uniform_int_distribution<int> range{0, 10};
 
 		out.reserve(count);
 		for (size_t i = 0; i < count; i++)

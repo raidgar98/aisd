@@ -2,6 +2,7 @@
 
 #include "../sorter.hpp"
 #include <algorithm>
+#include <tuple>
 
 namespace sorting_algorithms
 {
@@ -41,11 +42,12 @@ namespace sorting_algorithms
 				{
 					next_iter = false;
 
-					for (auto j = begin; j < end; ++j) if (*curr < *j)
-					{
-						std::iter_swap(curr, j);
-						next_iter = true;
-					}
+					for (auto j = begin; j < end; ++j) 
+						if (*curr < *j)
+						{
+							std::iter_swap(curr, j);
+							next_iter = true;
+						}
 					curr++;
 				}while(next_iter && curr != end);
 			}
@@ -55,26 +57,51 @@ namespace sorting_algorithms
 		class two_way_reduced : public abstract_sorter< two_way_reduced , T>
 		{
 			using abstract_sorter<two_way_reduced, T>::abstract_sorter;
+			using iterator_t = decltype( ((std::vector<T>*)(nullptr))->begin() );
 
 			virtual void sort() override
 			{
-				throw; // not implemented
 				auto begin = this->data->begin();
 				auto end = this->data->end();
-				auto curr = begin; curr++;
+				auto curr = begin;
+				auto rcurr = std::prev(end); 
+
 				bool next_iter = false;
+
+				auto min_max = [&]() -> std::tuple<iterator_t,iterator_t> {
+					auto cur_max = rcurr;
+					auto cur_min = curr;
+					next_iter = false;
+
+					for(auto j = curr; j < rcurr || j == rcurr; ++j)
+					{
+						next_iter = true;
+						std::cout << *j << std::endl;
+						if(*j < *cur_min) cur_min = j;
+						if(*j > *cur_max) cur_max = j;
+					}
+
+					if(cur_min == cur_max) cur_max = end;
+					return {cur_min, cur_max};
+				};
 
 				do
 				{
-					next_iter = false;
+					auto [min, max] = min_max();
+					std::iter_swap(min, curr);
+					std::advance(curr, 1);
 
-					for (auto j = begin; j < end; ++j) if (*curr < *j)
+					if(max != end)
 					{
-						std::iter_swap(curr, j);
-						next_iter = true;
+						std::iter_swap(max, rcurr);
+						std::advance(rcurr, -1);
 					}
-					curr++;
-				}while(next_iter && curr != end);
+
+					this->display();
+					std::cout << std::endl;
+					std::cout << "###################" << std::endl;
+
+				}while(rcurr != curr && next_iter);
 			}
 		};
 	}
