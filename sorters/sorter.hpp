@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <iostream>
 #include <string>
 #include <memory>
@@ -19,14 +20,29 @@ using collection_ptr_t = std::shared_ptr<collection_t<Element>>;
 namespace utils
 {
 	template <typename T>
-	void create_random_data(collection_t<T> &out, const size_t count = 10)
+	void create_random_data(collection_t<T> &out, const size_t count = 5)
 	{
 		std::random_device engine;
-		std::uniform_int_distribution<int> range{0, 10};
+		std::uniform_int_distribution<int> range{0,10};
 
 		out.reserve(count);
 		for (size_t i = 0; i < count; i++)
 			out.emplace_back(range(engine));
+	}
+
+	template <typename T>
+	void create_random_data_unique(collection_t<T> &out, const size_t count = 5)
+	{
+		std::random_device engine;
+		std::uniform_int_distribution<int> range{0,10};
+
+		out.reserve(count);
+		std::set<T> _uniq;
+		while(_uniq.size() != count)
+			_uniq.insert(range(engine));
+
+		for(const auto& v : _uniq) out.emplace_back(v);
+		std::shuffle(out.begin(), out.end(), engine);
 	}
 
 	template <typename T>
@@ -57,6 +73,7 @@ namespace sorting_algorithms
 		using coll_ptr_t = collection_ptr_t<Element>;
 
 		explicit abstract_sorter(coll_t &input) : data{&input, [](coll_t*){ /* no destroying */}} {}
+		explicit abstract_sorter(coll_t &&input) : data{&input, [](coll_t*){ /* no destroying */}} {}
 		explicit abstract_sorter(coll_ptr_t &input) : data{input} {}
 		abstract_sorter() : data{new coll_t{}}
 		{
@@ -82,6 +99,16 @@ namespace sorting_algorithms
 			return os;
 		}
 
+		operator bool()
+		{
+			this->sort();
+			if(!utils::is_sorted(*data))
+			{
+				this->display();
+				return false;
+			}else return true;
+		}
+
 		void display(std::ostream &os = std::cout) const
 		{
 			os << "[ ";
@@ -91,10 +118,11 @@ namespace sorting_algorithms
 					os << ",";
 				os << " " << *it;
 			}
-			os << " ]";
+			os << " ]\n";
 		}
 
 		virtual void sort() = 0;
+		static std::string uname() { return get_class_name(); }
 
 	protected:
 		coll_ptr_t data;

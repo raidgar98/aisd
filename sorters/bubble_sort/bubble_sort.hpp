@@ -35,19 +35,25 @@ namespace sorting_algorithms
 			{
 				auto begin = this->data->begin();
 				auto end = this->data->end();
-				auto curr = begin; curr++;
+				auto curr = begin;
 				bool next_iter = false;
 
 				do
 				{
-					next_iter = false;
-
-					for (auto j = begin; j < end; ++j) 
-						if (*curr < *j)
+					// this->display();
+					next_iter = false; //!(*curr < *std::next(curr));
+					auto checker = curr;
+					for (auto j = std::next(curr); j < end; ++j, ++checker) 
+					{
+						if (*j < *curr)
 						{
 							std::iter_swap(curr, j);
 							next_iter = true;
+						}else if( !(*checker < *j)) 
+						{
+							next_iter = true;
 						}
+					}
 					curr++;
 				}while(next_iter && curr != end);
 			}
@@ -58,50 +64,71 @@ namespace sorting_algorithms
 		{
 			using abstract_sorter<two_way_reduced, T>::abstract_sorter;
 			using iterator_t = decltype( ((std::vector<T>*)(nullptr))->begin() );
+			// using abstract_sorter<two_way_reduced, T>::coll_t;
 
 			virtual void sort() override
 			{
+				// *this->data = collection_t<T>{ { 6, 4, 4, 0, 2 } };
 				auto begin = this->data->begin();
 				auto end = this->data->end();
+				
 				auto curr = begin;
 				auto rcurr = std::prev(end); 
 
-				bool next_iter = false;
+				auto it = curr;
 
-				auto min_max = [&]() -> std::tuple<iterator_t,iterator_t> {
-					auto cur_max = rcurr;
-					auto cur_min = curr;
-					next_iter = false;
+				bool forward = true;
+				bool prime = true;
+				bool apply = false;
 
-					for(auto j = curr; j < rcurr || j == rcurr; ++j)
-					{
-						next_iter = true;
-						std::cout << *j << std::endl;
-						if(*j < *cur_min) cur_min = j;
-						if(*j > *cur_max) cur_max = j;
-					}
+				auto min = begin;
+				auto max = rcurr;
 
-					if(cur_min == cur_max) cur_max = end;
-					return {cur_min, cur_max};
-				};
+				// this->display();
 
 				do
 				{
-					auto [min, max] = min_max();
-					std::iter_swap(min, curr);
-					std::advance(curr, 1);
+					if(*it < *min) min = it;
+					else if(*max < *it) max = it;
 
-					if(max != end)
+					if(!prime && (it == curr || it == rcurr))
 					{
-						std::iter_swap(max, rcurr);
-						std::advance(rcurr, -1);
+						bool max_swapped = false;
+						std::iter_swap(min, curr);
+						// this->display();
+						if(rcurr != min && curr != max)
+						{
+							std::iter_swap(max, rcurr);
+							max_swapped = true;
+						}
+						// this->display();
+						
+						apply = false;
+						prime = true;
+						
+						curr++;
+						if(curr != rcurr && max_swapped) rcurr--;
+						else if(!*curr < *rcurr) std::iter_swap(curr, rcurr);
+						// this->display();
+						
+						min = curr;
+						max = rcurr;
+
+						if(forward)
+						{
+							forward = false;
+							it = rcurr;
+						}
+						else
+						{
+							forward = true;
+							it = curr;
+						}
+					}else{
+						it = (forward ? std::next(it) : std::prev(it));
+						prime = false;
 					}
-
-					this->display();
-					std::cout << std::endl;
-					std::cout << "###################" << std::endl;
-
-				}while(rcurr != curr && next_iter);
+				}while(curr != rcurr);
 			}
 		};
 	}
