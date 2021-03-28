@@ -40,8 +40,7 @@ namespace sorting_algorithms
 
 				do
 				{
-					// this->display();
-					next_iter = false; //!(*curr < *std::next(curr));
+					next_iter = false;
 					auto checker = curr;
 					for (auto j = std::next(curr); j < end; ++j, ++checker) 
 					{
@@ -64,11 +63,9 @@ namespace sorting_algorithms
 		{
 			using abstract_sorter<two_way_reduced, T>::abstract_sorter;
 			using iterator_t = decltype( ((std::vector<T>*)(nullptr))->begin() );
-			// using abstract_sorter<two_way_reduced, T>::coll_t;
 
 			virtual void sort() override
 			{
-				// *this->data = collection_t<T>{ { 6, 4, 4, 0, 2 } };
 				auto begin = this->data->begin();
 				auto end = this->data->end();
 				
@@ -95,13 +92,11 @@ namespace sorting_algorithms
 					{
 						bool max_swapped = false;
 						std::iter_swap(min, curr);
-						// this->display();
 						if(rcurr != min && curr != max)
 						{
 							std::iter_swap(max, rcurr);
 							max_swapped = true;
 						}
-						// this->display();
 						
 						apply = false;
 						prime = true;
@@ -109,7 +104,6 @@ namespace sorting_algorithms
 						curr++;
 						if(curr != rcurr && max_swapped) rcurr--;
 						else if(!*curr < *rcurr) std::iter_swap(curr, rcurr);
-						// this->display();
 						
 						min = curr;
 						max = rcurr;
