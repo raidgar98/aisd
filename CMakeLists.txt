@@ -5,6 +5,7 @@ project(aisd)
 
 set( ${CMAKE_CXX_STANDARD} 20 )
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-w")
 
 include("${CMAKE_SOURCE_DIR}/cmakes/get_all_directories.cmake")
 

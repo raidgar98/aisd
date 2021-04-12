@@ -39,7 +39,7 @@ int main_2()
 
 using string = std::string;
 template <typename Any>
-using Lista = typename collections::array_list<Any>;
+using Lista = typename collections::linked_list<Any>;
 
 void Test1()
 {
@@ -105,10 +105,10 @@ void Test2()
 
 int main()
 {
-	Lista<int> list{{1, 2, 3, 4, 5, 6}};
+	collections::linked_list<int> list{{1, 2, 3, 4, 5, 6}};
 	list.wstaw(4, 10);
 	std::cout << list << ": " << list.rozmiar() << std::endl;
-	list.usun(1);
+	list.usun(4);
 	std::cout << list << ": " << list.rozmiar() << std::endl;
 
 	Test1();

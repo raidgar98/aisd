@@ -22,6 +22,19 @@ namespace collections
         return os << " ]";
     }
 
+    template <typename U>
+    inline std::ostream &operator<<(std::ostream &os, const linked_list<U> &arr)
+    {
+        os << "[ ";
+        for (uint32_t i = 0; i < arr.m_size; i++)
+        {
+            if (i > 0)
+                os << ", ";
+            os << *arr.get(i).value;
+        }
+        return os << " ]";
+    }
+
     using time_point_t = decltype(std::chrono::system_clock::now());
     using duration_t = typename time_point_t::duration;
     
