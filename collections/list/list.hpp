@@ -206,38 +206,6 @@ namespace collections
         index_t m_size{0u};
 
     public:
-
-/*
-struct iterator_t
-        {
-            friend class array_list<ElementT>;
-
-            using difference_type = size_t;
-            using value_type = ElementT;
-            using pointer = elem_t;
-            using reference = ElementT &;
-
-            reference operator*() { return **m_ptr; }
-            const reference operator*() const { return **m_ptr; }
-
-            reference operator->() { return **m_ptr; }
-            const reference operator->() const { return **m_ptr; }
-
-            void operator++() { (++m_ptr); }
-            void operator++(int) { (m_ptr++); }
-
-            void operator--() { (--m_ptr); }
-            void operator--(int) { (m_ptr--); }
-
-            inline friend bool operator!=(const iterator_t &me, const iterator_t &you) { return me.m_ptr != you.m_ptr; }
-            inline friend bool operator==(const iterator_t &me, const iterator_t &you) { return me.m_ptr == you.m_ptr; }
-
-        private:
-            explicit iterator_t(elem_t *e) : m_ptr{e} {}
-            elem_t *m_ptr;
-        };
-
-*/
         struct iterator_t
         {
             friend class linked_list<ElementT>;
