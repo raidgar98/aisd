@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "collections/collections.hpp"
-
+/*
 constexpr uint32_t test_count{10'000'000};
 
 template <typename T>
@@ -40,77 +40,58 @@ int main_2()
 using string = std::string;
 template <typename Any>
 using Lista = typename collections::linked_list<Any>;
+*/
 
-void Test1()
+template< template<typename X> typename collection_t>
+requires(collections::lista_req<collection_t>)
+void test_01()
 {
+	collection_t<std::string> list;
 
-	Lista<string> l;
 	std::cout << "======= Dodawanie ==========" << std::endl;
-	l.dodaj("a");
-	l.dodaj("b");
-	l.dodaj("c");
-	for (int i = 0; i < l.rozmiar(); i++)
-	{
-		string v = l.odczytaj(i);
-		std::cout << i << " : " << v << std::endl;
-	}
+	list.dodaj("a");
+	list.dodaj("b");
+	list.dodaj("c");
+
+	std::cout << "======= Odczytywanie ==========" << std::endl;
+	std::cout << list << std::endl;
+
 	std::cout << "====== Usuwanie ==========" << std::endl;
-	l.usun(1);
-	for (int i = 0; i < l.rozmiar(); i++)
-	{
-		string v = l.odczytaj(i);
-		std::cout << i << " : " << v << std::endl;
-	}
+	list.usun(1);
+	std::cout << list << std::endl;
+
 	std::cout << "========Wstawianie ========" << std::endl;
-	l.wstaw(1, "g");
-	for (int i = 0; i < l.rozmiar(); i++)
-	{
-		string v = l.odczytaj(i);
-		std::cout << i << " : " << v << std::endl;
-	}
+	list.wstaw(1, "g");
+	std::cout << list << std::endl;
+
 	std::cout << "======== Szukanie =========" << std::endl;
-	std::cout << "(g) jest pod indeksem " << l.szukaj("g") << std::endl;
+	std::cout << "(g) jest pod indeksem " << list.szukaj("g") << std::endl;
+
 	std::cout << "======== Usuwanie 2 =========" << std::endl;
-	l.usun(2);
-	for (int i = 0; i < l.rozmiar(); i++)
-	{
-		string v = l.odczytaj(i);
-		std::cout << i << " : " << v << std::endl;
-	}
+	list.usun(2);
+	std::cout << list << std::endl;
 }
 
-void Test2()
+template< template<typename X> typename collection_t>
+requires(collections::lista_req<collection_t>)
+void test_02(const std::string& message)
 {
-	const size_t N = 1'000;
-	using ari = Lista<int>;
-	{
-		ari list;
-		std::cout << "===== Lista Tablicowa =======" << std::endl;
-		std::cout << collections::adding<ari>{list, N};
-		std::cout << collections::reading<ari>{list};
-		std::cout << collections::reading_foreach<ari>{list};
-		std::cout << collections::searching<ari>(list);
-		std::cout << collections::ereasing<ari>(list);
-	}
-	// {
-	// 	Lista<int> l;
-	// 	std::cout << "===== Lista Wskaznikowa =======" << std::endl;
-	// 	std::cout << "Czas dodawania:" + CzasDodawania(l, n) << std::endl;
-	// 	std::cout << "Czas odczytu  :" + CzasOdczytu(l) << std::endl;
-	// 	std::cout << "Czas szukania:" + CzasSzukania(l) << std::endl;
-	// 	std::cout << "Czas usuwania :" + CzasUsuwania(l) << std::endl;
-	// }
-	// Console.ReadKey();
+	const size_t N = 10'000;
+	using coll_t = collection_t<int>;
+	if(!message.empty()) std::cout << "===== " << message << " =======" << std::endl;
+
+	coll_t list;
+	std::cout << collections::adding<coll_t>{list, N};
+	std::cout << collections::reading<coll_t>{list};
+	std::cout << collections::reading_foreach<coll_t>{list};
+	std::cout << collections::searching<coll_t>(list);
+	std::cout << collections::ereasing<coll_t>(list);
 }
 
 int main()
 {
-	collections::linked_list<int> list{{1, 2, 3, 4, 5, 6}};
-	list.wstaw(4, 10);
-	std::cout << list << ": " << list.rozmiar() << std::endl;
-	list.usun(4);
-	std::cout << list << ": " << list.rozmiar() << std::endl;
-
-	Test1();
-	Test2();
+	test_01<collections::linked_list>();
+	test_01<collections::array_list>();
+	test_02<collections::linked_list>("Lista Wskaźnikowa");
+	test_02<collections::array_list>("Lista Tablicowa");
 }

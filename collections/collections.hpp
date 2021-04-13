@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <iomanip>
+#include <type_traits>
+#include <concepts>
 
 #include "list/list.hpp"
 
@@ -9,6 +11,23 @@ using namespace std::chrono_literals;
 
 namespace collections
 {
+
+    template<template<typename T> typename coll_t>
+    concept lista_req = requires(coll_t<std::string> coll, const coll_t<std::string> ccoll)
+    {
+        typename coll_t<std::string>::value_type;
+        { coll_t{ { std::string{}, std::string{}, std::string{} } } };
+        { coll.dodaj( std::string{""} ) } -> std::same_as<void>;
+        { coll.usun( 1u ) } -> std::same_as<std::string>;
+        { coll.wstaw( 1u, std::string{""} ) } -> std::same_as<void>;
+        { coll.szukaj( std::string{""} ) } -> std::same_as<uint32_t>;
+        { coll.odczytaj( 1u ) } -> std::same_as<std::string&>;
+        { ccoll.odczytaj( 1u ) } -> std::same_as<const std::string&>;
+        { coll.rozmiar() } -> std::same_as<uint32_t>;
+        { *coll.begin() } -> std::same_as<std::string&>;
+        { *coll.end() } -> std::same_as<std::string&>;
+    };
+
     template <typename U>
     inline std::ostream &operator<<(std::ostream &os, const array_list<U> &arr)
     {

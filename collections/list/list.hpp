@@ -19,8 +19,7 @@ namespace collections
 {
 
     constexpr size_t c_growth_factor{10u};
-    constexpr size_t c_shrink_factor{c_growth_factor};
-    constexpr size_t c_shrink_level{2};
+    constexpr double c_shrink_level{2.5};
 
     template <typename ElementT>
     struct ilist
@@ -125,8 +124,8 @@ namespace collections
         {
             massert(m_size > 0, "array_list is empty");
             check_range(pos);
-            if (m_size * c_shrink_level <= m_max_size)
-                resize(m_max_size - c_shrink_factor);
+            if (m_size * c_shrink_level < m_max_size)
+                resize(m_max_size - m_size);
 
             elem_t result = m_data[pos];
             m_data[pos].reset();
