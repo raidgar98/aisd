@@ -1,42 +1,17 @@
 #pragma once
 
 #include <iostream>
-#include <cstring>
+#include <functional>
+#include <limits>
 #include <memory>
-// #include <cassert>
-
-template <typename Any>
-constexpr void massert(const bool expr, const Any msg = "assert")
-{
-    if (!expr)
-    {
-        std::cout << "assertion message: `" << msg << '`' << std::endl;
-        throw msg;
-    }
-}
+#include <iomanip>
+#include "../interfaces.h"
 
 namespace collections
 {
 
     constexpr size_t c_growth_factor{10u};
     constexpr double c_shrink_level{2.5};
-
-    template <typename ElementT>
-    struct ilist
-    {
-        using value_type = ElementT;
-        using elem_t = std::shared_ptr<ElementT>;
-        using index_t = uint32_t;
-
-        virtual void dodaj(const ElementT &) = 0;
-        virtual ElementT usun(const index_t) = 0;
-        virtual void wstaw(const index_t, const ElementT &) = 0;
-        virtual index_t szukaj(const ElementT &) = 0;
-        virtual ElementT &odczytaj(const index_t) = 0;
-        virtual const ElementT &odczytaj(const index_t) const = 0;
-        virtual index_t rozmiar() const = 0;
-        virtual ~ilist() {}
-    };
 
     template <typename ElementT>
     class array_list : public ilist<ElementT>
@@ -70,8 +45,8 @@ namespace collections
             void operator--() { (--m_ptr); }
             void operator--(int) { (m_ptr--); }
 
-            inline friend bool operator!=(const iterator_t &me, const iterator_t &you) { return me.m_ptr != you.m_ptr; }
             inline friend bool operator==(const iterator_t &me, const iterator_t &you) { return me.m_ptr == you.m_ptr; }
+            inline friend bool operator!=(const iterator_t &me, const iterator_t &you) { return !(me.m_ptr == you.m_ptr); }
 
         private:
             explicit iterator_t(elem_t *e) : m_ptr{e} {}
@@ -87,8 +62,8 @@ namespace collections
                 insert(m_size, val);
         }
 
-        virtual void dodaj(const ElementT &e) override { insert(m_size, e); }
-        virtual void wstaw(const index_t i, const ElementT &e) override { insert(i, e); }
+        virtual void dodaj(const ElementT &e) override { insert_proxy(m_size, e); }
+        virtual void wstaw(const index_t i, const ElementT &e) override { insert_proxy(i, e); }
         virtual index_t szukaj(const ElementT &e) override { return lookup(e); }
         virtual ElementT usun(const index_t i) override { return *erease(i); }
         virtual ElementT &odczytaj(const index_t i) override { return get(i); }
@@ -96,9 +71,18 @@ namespace collections
         virtual index_t rozmiar() const override { return m_size; }
 
         iterator_t begin() const { return iterator_t{m_data.get()}; }
-        iterator_t end() const { return iterator_t{m_data.get() + m_size + 1}; }
+        iterator_t end() const { return iterator_t{m_data.get() + m_size}; }
 
-    private:
+    protected:
+
+        constexpr static index_t c_not_found{ std::numeric_limits<index_t>::max() };
+
+        virtual bool insert_proxy(const index_t i, const ElementT& e)
+        {
+            insert(i, e);
+            return true;
+        }
+
         ElementT &get(const index_t pos)
         {
             check_range(pos);
@@ -111,13 +95,19 @@ namespace collections
             return *m_data[pos];
         }
 
-        index_t lookup(const ElementT &e) const
+        index_t lookup_noexcept(const ElementT &e) const noexcept
         {
             for (index_t i = 0; i < m_size; i++)
                 if (get(i) == e)
                     return i;
-            massert(false, "no match");
-            return index_t{}; // never will be executed
+            return c_not_found;
+        }
+
+        index_t lookup(const ElementT &e) const
+        {
+            const index_t result{ lookup_noexcept(e) };
+            massert( result != c_not_found, "no match" );
+            return result;
         }
 
         elem_t erease(const index_t pos)
@@ -138,7 +128,7 @@ namespace collections
             return result;
         }
 
-        void insert(const index_t pos, const ElementT &e)
+        bool insert(const index_t pos, const ElementT &e)
         {
             check_range(pos, true);
             if (0 == m_max_size or m_max_size == m_size)
@@ -155,6 +145,7 @@ namespace collections
             }
 
             m_size++;
+            return true;
         }
 
         void check_range(const index_t pos, const bool equal = false) const

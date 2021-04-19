@@ -1,0 +1,1 @@
+add_library(mymap STATIC map.cpp)

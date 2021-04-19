@@ -5,38 +5,17 @@
 #include <type_traits>
 #include <concepts>
 
-#include "list/list.hpp"
-
 using namespace std::chrono_literals;
-
 namespace collections
 {
-
-    template<template<typename T> typename coll_t>
-    concept lista_req = requires(coll_t<std::string> coll, const coll_t<std::string> ccoll)
-    {
-        typename coll_t<std::string>::value_type;
-        { coll_t{ { std::string{}, std::string{}, std::string{} } } };
-        { coll.dodaj( std::string{""} ) } -> std::same_as<void>;
-        { coll.usun( 1u ) } -> std::same_as<std::string>;
-        { coll.wstaw( 1u, std::string{""} ) } -> std::same_as<void>;
-        { coll.szukaj( std::string{""} ) } -> std::same_as<uint32_t>;
-        { coll.odczytaj( 1u ) } -> std::same_as<std::string&>;
-        { ccoll.odczytaj( 1u ) } -> std::same_as<const std::string&>;
-        { coll.rozmiar() } -> std::same_as<uint32_t>;
-        { *coll.begin() } -> std::same_as<std::string&>;
-        { *coll.end() } -> std::same_as<std::string&>;
-    };
-
     template <typename U>
     inline std::ostream &operator<<(std::ostream &os, const array_list<U> &arr)
     {
         os << "[ ";
-        for (uint32_t i = 0; i < arr.rozmiar(); i++)
+        for(auto it = arr.begin(); it != arr.end(); it++)
         {
-            if (i > 0)
-                os << ", ";
-            os << arr.odczytaj(i);
+            if (it != arr.begin()) os << ", ";
+            os << *it;
         }
         return os << " ]";
     }
@@ -161,4 +140,62 @@ namespace collections
             return os << "clearing whole collection took: " << ss.duration << std::endl;
         }
     };
+
+    template<template<typename K, typename V> typename map_t, typename key_t>
+    requires map_req<map_t> 
+    struct adding<map_t<key_t, std::string>>
+    {
+        size_t elements;
+        duration_t duration;
+
+        adding(map_t<key_t, std::string>& list, const size_t n) 
+            : elements{n}
+        {
+            scope_timer _{duration};
+            for(size_t i = 0; i < elements; ++i) list.wstaw( i, std::to_string(i) );
+        }
+
+        inline friend std::ostream& operator<<(std::ostream& os, const adding<map_t<key_t, std::string>>& ss)
+        {
+            return os << "adding " << ss.elements << " elements took: " << ss.duration << std::endl;
+        }
+    };
+
+    template<template<typename K, typename V> typename map_t, typename key_t>
+    requires map_req<map_t> 
+    struct searching<map_t<key_t, std::string>>
+    {
+        duration_t duration;
+
+        searching(map_t<key_t, std::string>& map) 
+        {
+            const size_t val = map.rozmiar() / 2u;
+            scope_timer _{duration};
+            map.istnieje( val );
+        }
+
+        inline friend std::ostream& operator<<(std::ostream& os, const searching<map_t<key_t, std::string>>& ss)
+        {
+            return os << "searching of middle element took: " << ss.duration << std::endl;
+        }
+    };
+
+    template<template<typename K, typename V> typename map_t, typename key_t>
+    requires map_req<map_t> 
+    struct ereasing<map_t<key_t, std::string>>
+    {
+        duration_t duration;
+
+        ereasing(map_t<key_t, std::string>& map) 
+        {
+            scope_timer _{duration};
+            do{ map.usun( (*map.begin()).key() ); }while(map.rozmiar());
+        }
+
+        inline friend std::ostream& operator<<(std::ostream& os, const ereasing<map_t<key_t, std::string>>& ss)
+        {
+            return os << "clearing whole collection took: " << ss.duration << std::endl;
+        }
+    };
+
 }

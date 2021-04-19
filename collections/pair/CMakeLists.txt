@@ -1,0 +1,1 @@
+add_library(mypair STATIC pair.cpp)
