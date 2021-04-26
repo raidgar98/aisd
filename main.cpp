@@ -102,7 +102,7 @@ requires(collections::lista_req<collection_t>) void run_collection_tests(const s
 	std::cout << ss.str();
 }
 
-template <template <collections::comparable_req T1, typename T2> typename map_t>
+template <template <typename T1, typename T2> typename map_t>
 requires collections::map_req<map_t> static void test_05(std::ostream& out)
 {
 	using str = std::string;
@@ -199,7 +199,7 @@ requires collections::map_req<map_t> static void test_05(std::ostream& out)
 	out << k << " : " << tabAso.odczytaj(k) << std::endl;
 }
 
-template <template <collections::comparable_req T1, typename T2> typename map_t>
+template <template <typename T1, typename T2> typename map_t>
 requires collections::map_req<map_t> static void test_06(std::ostream& out)
 {
 	using str = std::string;
@@ -257,27 +257,27 @@ requires collections::map_req<map_t> static void test_06(std::ostream& out)
 	for (const auto& para : tabAso) out << para << std::endl;
 }
 
-template <template <collections::comparable_req T1, typename T2> typename map_t>
+template <template <typename T1, typename T2> typename map_t>
 requires collections::map_req<map_t> static void test_07(std::ostream& os)
 {
 	using coll_t = map_t<int, std::string>;
 
 	coll_t map;
-	os << collections::adding<coll_t>{map, test_count};
+	os << collections::map_adding<map_t>{map, test_count};
 	os << collections::reading<coll_t>{map};
 	os << collections::reading_foreach<coll_t>{map};
-	os << collections::searching<coll_t>(map);
-	os << collections::ereasing<coll_t>(map);
+	os << collections::map_searching<map_t>(map);
+	os << collections::map_ereasing<map_t>(map);
 }
 
-template <template <collections::comparable_req T1, typename T2> typename map_t>
+template <template <typename T1, typename T2> typename map_t>
 requires collections::map_req<map_t> void run_map_tests(const std::string &msg)
 {
 	std::stringstream ss;
 	if (!msg.empty()) ss << "===== " << msg << " =======" << std::endl;
 
-	// test_05<map_t>(ss);
-	// test_06<map_t>(ss);
+	test_05<map_t>(ss);
+	test_06<map_t>(ss);
 	test_07<map_t>(ss);
 
 	std::cout << ss.str();
@@ -287,5 +287,6 @@ int main()
 {
 	std::jthread coll_0{[&]() { run_collection_tests<collections::array_list>("array_list"); }};
 	std::jthread coll_1{[&]() { run_collection_tests<collections::linked_list>("linked_list"); }};
-	std::jthread coll_2{[&]() { run_map_tests<collections::flat_unordered_map>("flat_map"); }};
+	std::jthread coll_2{[&]() { run_map_tests<collections::flat_unordered_map>("flat_unordered_map"); }};
+	std::jthread coll_3{[&]() { run_map_tests<collections::flat_map>("flat_map"); }};
 }

@@ -66,14 +66,10 @@ namespace collections
         void value(const second_t &v) { m_value = std::make_shared<second_t>(v); }
 
         inline friend bool operator==(const map_pair &p1, const map_pair &p2) { return p1.key() == p2.key(); }
+        inline friend bool operator<(const map_pair &p1, const map_pair &p2) { return p1.key() < p2.key(); }
         inline friend std::ostream &operator<<(std::ostream &os, const map_pair &p)
         {
-            os << "( ";
-            os << p.key();
-            os << " ; "; 
-            os << p.value();
-            os << " )";
-            return os;
+            return os << "( " << p.key() << " ; " << p.value() << " )";
         }
     };
 }

@@ -16,9 +16,11 @@ namespace collections
     template <typename ElementT>
     class array_list : public ilist<ElementT>
     {
+    protected:
         using elem_t = typename ilist<ElementT>::elem_t;
         using index_t = typename ilist<ElementT>::index_t;
 
+    private:
         std::unique_ptr<elem_t[]> m_data{};
         index_t m_size{0};
         index_t m_max_size{0};

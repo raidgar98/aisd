@@ -92,7 +92,12 @@ namespace collections
         virtual ~iset() {}
     };
 
-    template<comparable_req KeyT, typename ValueT>
+    template <template <typename T> typename set_t>
+    concept set_req =
+        std::derived_from<set_t<int>, iset<int>> &&
+            std::is_constructible_v<set_t<int>>;
+
+    template<typename KeyT, typename ValueT>
     struct imap
     {
         using key_t = KeyT;
@@ -109,7 +114,7 @@ namespace collections
         virtual ~imap() {}
     };
 
-    template <template <comparable_req T1, typename T2> typename map_t>
+    template <template <typename T1, typename T2> typename map_t>
     concept map_req = 
         std::derived_from< map_t<int, int>, imap<int, int> > &&
         std::is_constructible_v<map_t<int, int>>;
