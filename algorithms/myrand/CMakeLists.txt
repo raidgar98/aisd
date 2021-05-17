@@ -1,0 +1,1 @@
+add_library(myrand STATIC myrand.cpp)

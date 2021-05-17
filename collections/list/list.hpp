@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -50,13 +51,15 @@ namespace collections
             inline friend bool operator==(const iterator_t &me, const iterator_t &you) { return me.m_ptr == you.m_ptr; }
             inline friend bool operator!=(const iterator_t &me, const iterator_t &you) { return !(me.m_ptr == you.m_ptr); }
 
+            void swap(iterator_t& x) { std::swap(*m_ptr, *x.m_ptr); }
+
         private:
             explicit iterator_t(elem_t *e) : m_ptr{e} {}
             elem_t *m_ptr;
         };
 
         array_list() { resize(c_growth_factor); }
-        explicit array_list(const index_t preallocate) { resize(preallocate); }
+        array_list(const index_t preallocate, bool) { resize(preallocate); }
         explicit array_list(const std::initializer_list<ElementT> &init)
         {
             resize(init.size());
@@ -72,8 +75,35 @@ namespace collections
         virtual const ElementT &odczytaj(const index_t i) const override { return get(i); }
         virtual index_t rozmiar() const override { return m_size; }
 
+        void wyczyść(){ reset(); }
+
         iterator_t begin() const { return iterator_t{m_data.get()}; }
         iterator_t end() const { return iterator_t{m_data.get() + m_size}; }
+
+        static void read_file(const std::string_view& filename, array_list<index_t>& dst)
+        {
+            std::shared_ptr<std::ifstream> file{ new std::ifstream{filename.data()}, [](std::ifstream* ptr){ if(ptr) { ptr->close(); delete ptr; } }};
+            massert(file->good(), "can't open file");
+            std::string line;
+            bool set = false;
+            while(std::getline(*file, line)) if(line.size())
+            {
+                const index_t num = static_cast<index_t>(std::stoul(line));
+                if(!set)
+                {
+                    dst.resize(num);
+                    set = true;
+                }else dst.dodaj( num );
+            }
+        }
+
+        static array_list<index_t> merge(const array_list<index_t>& in_1, const array_list<index_t>& in_2)
+        {
+            array_list<index_t> result{}; result.resize(in_1.rozmiar() + in_2.rozmiar());
+            for(const auto& x : in_1) result.dodaj(x);
+            for(const auto& x : in_2) result.dodaj(x);
+            return result;
+        }
 
     protected:
 
@@ -161,6 +191,13 @@ namespace collections
 
         static elem_t construct(const ElementT &e) { return std::make_shared<ElementT>(e); }
 
+        void reset()
+        {
+            m_data.reset(new elem_t[c_growth_factor + 1]);
+            m_max_size = c_growth_factor;
+            m_size = 0;
+        }
+
         void resize(const index_t objects)
         {
             massert(objects >= m_size, "there should be enough space for all objects");
@@ -219,7 +256,9 @@ namespace collections
 
             inline friend bool operator!=(const iterator_t &me, const iterator_t &you) { return me.m_ptr.lock() != you.m_ptr.lock(); }
             inline friend bool operator==(const iterator_t &me, const iterator_t &you) { return me.m_ptr.lock() == you.m_ptr.lock(); }
-
+            
+            void swap(iterator_t& x) { std::swap(*m_ptr, *x.m_ptr); }
+            
         private:
             void next()
             {
